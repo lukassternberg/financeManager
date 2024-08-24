@@ -1,3 +1,4 @@
+import java.time.LocalDate;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -9,11 +10,13 @@ public class AddTransactionDialog extends JDialog {
   private JTextField amountField;
   private JTextField recipientField;
   private JTextField descriptionField;
-  private AccountStatement accountStatement;
 
-  public AddTransactionDialog(JFrame parent, AccountStatement accountStatement) {
+  private DefaultListModel<Transaction> transactionListModel;
+
+
+  public AddTransactionDialog(JFrame parent, DefaultListModel<Transaction> transactionListModel) {
     super(parent, "Neue Transaktion hinzufügen", true);
-    this.accountStatement = accountStatement;
+    this.transactionListModel = transactionListModel;
 
     // Layout-Einstellungen
     setLayout(new GridLayout(4, 2));
@@ -38,8 +41,6 @@ public class AddTransactionDialog extends JDialog {
     addButton.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        //Transaction transaction = new Transaction(new Date(), descriptionField.getText(), Double.parseDouble(amountField.getText()));
-        //accountStatement.addTransaction(transaction);
         addTransaction();
       }
     });
@@ -72,8 +73,8 @@ public class AddTransactionDialog extends JDialog {
         return;
       }
 
-      Transaction transaction = new Transaction(new Date(), description + " - " + recipient, amount);
-      accountStatement.addTransaction(transaction);
+      Transaction transaction = new Transaction(LocalDate.now(), description + " - " + recipient, amount);
+      transactionListModel.addElement(transaction);
 
       dispose();
     } catch (NumberFormatException e) {

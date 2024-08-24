@@ -1,68 +1,66 @@
 import java.awt.event.ActionListener;
+import java.time.LocalDate;
 import javax.swing.*;
 import java.awt.*;
 import java.util.Date;
+import org.jfree.chart.ChartPanel;
 
 public class AccountStatementGUI extends JFrame {
 
-  private AccountStatement accountStatement;
   private JList<Transaction> transactionList;
+  private DefaultListModel<Transaction> transactionListModel;
+  public DefaultListModel<Transaction> getTransactionListModel() {
+    return transactionListModel;
+  }
 
   public AccountStatementGUI() {
-    accountStatement = new AccountStatement();
-    accountStatement.addTransaction(new Transaction(new Date(), "Deposit", 500.00));
-    accountStatement.addTransaction(new Transaction(new Date(), "Withdrawal", -200.00));
 
     // Fenster-Einstellungen
     setTitle("Kontoauszug");
-    setSize(400, 300);
+    setSize(800, 600);
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     setLayout(new BorderLayout());
 
-    // TextArea für Transaktionen
-    JTextArea textArea = new JTextArea();
-    textArea.setEditable(false);
-    add(new JScrollPane(textArea), BorderLayout.CENTER);
+    // DefaultListModel erstellen und Transaktionen hinzufügen
+    transactionListModel = new DefaultListModel<>();
+    transactionListModel.addElement(new Transaction(LocalDate.now(), "Deposit", 100.00));
+    transactionListModel.addElement(new Transaction(LocalDate.now(), "Withdrawal", -50.00));
+    transactionListModel.addElement(new Transaction(LocalDate.now(), "Deposit", 200.00));
 
-    // Button zum Aktualisieren der Anzeige
-    JButton refreshButton = new JButton("Refresh");
-    refreshButton.addActionListener(refresh(textArea));
+    // JList erstellen und platzieren
+    transactionList = new JList<>(transactionListModel);
+    transactionList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    transactionList.setVisibleRowCount(10);
+    add(new JScrollPane(transactionList), BorderLayout.WEST);
+
+    //Kontoverlaufsübersicht
+    // Füge das Diagramm zu einem Swing-Panel hinzu
+    ChartPanel chartPanel = new ChartPanel(Charts. createLineChart(Charts.listModelToList(transactionListModel)));//in liste umwandeln
+    chartPanel.setPreferredSize(new java.awt.Dimension(800, 600));
+    //setContentPane(chartPanel);
+    add(chartPanel, BorderLayout.EAST);
+
+
 
     //Button für neue Transaktion
     JButton addButton = new JButton("Add new Transaction");
-    addButton.addActionListener(addTransaction(this.accountStatement));
+    addButton.addActionListener(addTransaction());
+    add(addButton, BorderLayout.SOUTH);
 
-    add(refreshButton, BorderLayout.SOUTH);
-    add(addButton, BorderLayout.WEST);
-
-    // JList erstellen
-    Transaction[] transactionArray = accountStatement.getTransactions().toArray(new Transaction[0]);
-    transactionList = new JList<>(transactionArray);
-    transactionList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-    transactionList.setVisibleRowCount(10);
-    add(new JScrollPane(transactionList), BorderLayout.CENTER);
 
     // Fenster sichtbar machen
     setLocationRelativeTo(null); // Fenster in der Bildschirmmitte positionieren
     setVisible(true);
   }
 
-  private ActionListener refresh(JTextArea textArea) {
+  private ActionListener addTransaction() {
     return e -> {
-      textArea.setText("");
-      for (Transaction transaction : accountStatement.getTransactions()) {
-        textArea.append(transaction.toString() + "\n");
-      }
-      textArea.append("Current Balance: " + accountStatement.getBalance());
+      //open JDialog
+      AddTransactionDialog dialog = new AddTransactionDialog(this, transactionListModel);
     };
   }
 
-  private ActionListener addTransaction(AccountStatement accountStatement) {
-    return e -> {
-      //open JDialog
-      AddTransactionDialog dialog = new AddTransactionDialog(this, accountStatement);
-    };
-  }
+
 
   public static void main(String[] args) {
     SwingUtilities.invokeLater(AccountStatementGUI::new);
