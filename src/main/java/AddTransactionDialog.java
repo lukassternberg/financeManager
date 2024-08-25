@@ -1,4 +1,5 @@
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -10,13 +11,15 @@ public class AddTransactionDialog extends JDialog {
   private JTextField amountField;
   private JTextField recipientField;
   private JTextField descriptionField;
+  private AccountStatementGUI parentGui;
 
   private DefaultListModel<Transaction> transactionListModel;
 
 
-  public AddTransactionDialog(JFrame parent, DefaultListModel<Transaction> transactionListModel) {
+  public AddTransactionDialog(JFrame parent, DefaultListModel<Transaction> transactionListModel, AccountStatementGUI parentGui) {
     super(parent, "Neue Transaktion hinzufügen", true);
     this.transactionListModel = transactionListModel;
+    this.parentGui = parentGui;
 
     // Layout-Einstellungen
     setLayout(new GridLayout(4, 2));
@@ -73,9 +76,9 @@ public class AddTransactionDialog extends JDialog {
         return;
       }
 
-      Transaction transaction = new Transaction(LocalDate.now(), description + " - " + recipient, amount);
+      Transaction transaction = new Transaction(LocalDateTime.now(), description + " - " + recipient, amount);
       transactionListModel.addElement(transaction);
-
+      parentGui.updateChart();
       dispose();
     } catch (NumberFormatException e) {
       JOptionPane.showMessageDialog(this, "Bitte einen gültigen Betrag eingeben.", "Fehler", JOptionPane.ERROR_MESSAGE);

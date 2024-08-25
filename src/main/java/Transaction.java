@@ -1,18 +1,17 @@
-import java.time.LocalDate;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 public class Transaction {
-  private LocalDate date;
+  private LocalDateTime date;
   private String description;
   private double amount;
 
-  public Transaction(LocalDate date, String description, double amount) {
+  public Transaction(LocalDateTime date, String description, double amount) {
     this.date = date;
     this.description = description;
     this.amount = amount;
   }
 
-  public LocalDate getDate() {
+  public LocalDateTime getDate() {
     return date;
   }
 

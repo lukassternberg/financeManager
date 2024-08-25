@@ -1,4 +1,5 @@
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.HashMap;
@@ -11,6 +12,9 @@ import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.data.time.Day;
+import org.jfree.data.time.TimeSeries;
+import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import java.time.LocalDate;
@@ -30,29 +34,20 @@ public class Charts {
         PlotOrientation.VERTICAL,
         true, true, false);
 
-    // Plot und X-Achse holen
-    XYPlot plot = chart.getXYPlot();
-    DateAxis xAxis = (DateAxis) plot.getDomainAxis(); // X-Achse als DateAxis
 
-    // Anpassung der X-Achse auf die letzten 6 Tage
-    Date startDate = Date.from(today.minusDays(6).atStartOfDay(ZoneId.systemDefault()).toInstant());
-    Date endDate = Date.from(today.atStartOfDay(ZoneId.systemDefault()).toInstant());
-    xAxis.setRange(startDate, endDate);
-
-    // Datum-Format für die X-Achse festlegen
-    xAxis.setDateFormatOverride(new SimpleDateFormat("dd.MM.yyyy"));
 
     return chart;
   }
 
-  public static XYSeriesCollection createDataset(List<Transaction> transactions) {
-    XYSeries series = new XYSeries("Konto");
+  public static TimeSeriesCollection createDataset(List<Transaction> transactions) {
+    TimeSeries series = new TimeSeries("Konto");
     HashMap<Transaction, Double> balances = Charts.getBalanceAfterEachTransaction(transactions);
     for (Transaction transaction : transactions) {
+      LocalDateTime date = transaction.getDate();
       double balance = balances.get(transaction);
-      series.add(transaction.getDate().toEpochDay(), balance);
+      series.addOrUpdate(new Day(date.getDayOfMonth(), date.getMonthValue(), date.getYear()), balance);
     }
-    return new XYSeriesCollection(series);
+    return new TimeSeriesCollection(series);
   }
 
 
